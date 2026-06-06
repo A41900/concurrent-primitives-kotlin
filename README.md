@@ -6,23 +6,50 @@ This repository was developed as part of the Concurrent Programming course at IS
 
 ---
 
-## Components
+# Table of Contents
 
-### Queue
-
-#### ThreadSafeNonBlockingQueue
-
-Thread-safe unbounded FIFO queue with:
-
-* non-blocking retrieval semantics (`removeOrNull`)
-* weakly consistent iteration
-* lock-based synchronization using `ReentrantLock`
+1. [Overview](#overview)
+2. [Components](#components)
+    - [ThreadSafeNonBlockingQueue](#threadsafenonblockingqueue)
+    - [AutoResetLatch](#autoresetlatch)
+    - [ThreadPool](#threadpool)
+    - [BoundedThreadScope](#boundedthreadscope)
+    - [BoundedEventTopic](#boundedeventtopic)
+    - [Coroutine BoundedEventTopic](#coroutine-boundedeventtopic)
+3. [Testing](#testing)
+4. [Technologies](#technologies)
+5. [Project Structure](#project-structure)
+6. [Academic Context](#academic-context)
 
 ---
 
-### Synchronization
+# Overview
 
-#### AutoResetLatch
+This repository contains a collection of concurrent programming primitives and synchronization constructs implemented in Kotlin.
+
+The project explores:
+
+- thread-safe data structures
+- synchronization primitives
+- execution management abstractions
+- publish-subscribe messaging systems
+- coroutine integration
+
+---
+
+# Components
+
+## ThreadSafeNonBlockingQueue
+
+Thread-safe unbounded FIFO queue with:
+
+- non-blocking retrieval semantics (`removeOrNull`)
+- weakly consistent iteration
+- lock-based synchronization using `ReentrantLock`
+
+---
+
+## AutoResetLatch
 
 Custom synchronization primitive inspired by auto-reset events.
 
@@ -34,27 +61,16 @@ This implementation uses a generation-based design instead of storing one reques
 - `activeAwaits` — threads currently inside `await`
 - `setCounter` — generation counter used to distinguish old and new `set` calls
 
-##### Features
-
-- timeout-aware waiting
-- JVM interrupt protocol support
-- automatic reset semantics
-- generation-based synchronization
-- exact accounting of successful wakeups
-- no accumulated permits for future awaits
-- thread-safe implementation using `ReentrantLock` and `Condition`
 
 ---
 
-### Execution Management
-
-#### ThreadPool
+## ThreadPool
 
 Custom thread pool executor implemented in Kotlin.
 
 This component executes `Continuation<Unit>` work items on a managed set of worker threads. The pool dynamically grows between a configured minimum and maximum number of workers, keeps idle workers alive for a limited time, and supports graceful shutdown.
 
-##### Features
+### Features
 
 - executes `Continuation<Unit>` tasks
 - configurable minimum and maximum worker count
@@ -75,8 +91,9 @@ It captures the caller coroutine continuation, submits work to the pool, execute
 
 This allows code to wait for work submitted to the pool without blocking the calling thread.
 
+---
 
-### BoundedThreadScope
+## BoundedThreadScope
 
 `BoundedThreadScope` is a structured thread management abstraction.
 
@@ -102,11 +119,8 @@ The scope has three states:
 - `CLOSED` — all started threads and child scopes have completed
 
 Each thread is wrapped so that, when it finishes, the scope can start the next queued thread and check whether the scope has completed.
+
 ---
-
-### Messaging
-
-#### BoundedEventTopic
 
 ## BoundedEventTopic
 
@@ -137,41 +151,72 @@ Features:
 * non-blocking waiting
 * coroutine-friendly API
 
+
+Thread-safe bounded publish-subscribe component.
+
+It allows producers to publish events while consumers create independent subscriptions.
+
+Each subscription maintains its own read position, allowing multiple subscribers to consume the same events independently.
+
+### Features
+
+- bounded circular buffer
+- multiple publishers
+- multiple subscribers
+- per-subscription read cursor
+- timeout-aware blocking reads
+- JVM interrupt support
+- graceful close semantics
+- automatic fast-forward for lagging subscribers
+
 ---
 
-## Testing
+# Testing
 
 The repository includes:
 
-* functional tests
-* concurrency tests
-* stress tests
+- functional tests
+- concurrency tests
+- stress tests
 
 used to validate correctness under concurrent workloads.
 
 ---
 
-## Technologies
+# Technologies
 
-* Kotlin
-* JVM Concurrency
-* Coroutines
-* JUnit
+- Kotlin
+- JVM Concurrency
+- Coroutines
+- JUnit
 
 ---
 
-## Academic Context
+# Project Structure
+
+```text
+src/main/kotlin/
+├── ThreadSafeNonBlockingQueue.kt
+├── AutoResetLatch.kt
+├── ThreadPool.kt
+├── BoundedThreadScope.kt
+├── BoundedEventTopic.kt
+└── KBoundedEventTopic.kt
+```
+
+---
+
+# Academic Context
 
 This repository was developed collaboratively as part of the Concurrent Programming course at ISEL.
 
-The objective was to explore the implementation of concurrent data structures, synchronization primitives, thread management abstractions, and asynchronous communication mechanisms.
+The objective was to explore the implementation of:
+
+- concurrent data structures
+- synchronization primitives
+- thread management abstractions
+- asynchronous communication mechanisms
+
+---
 
 
-## Components
-
-- [ThreadSafeNonBlockingQueue](src/main/kotlin/ThreadSafeNonBlockingQueue.kt)
-- [AutoResetLatch](src/main/kotlin/AutoResetLatch.kt)
-- [ThreadPool](src/main/kotlin/ThreadPool.kt)
-- [BoundedThreadScope](src/main/kotlin/BoundedThreadScope.kt)
-- [BoundedEventTopic](src/main/kotlin/BoundedEventTopic.kt)
-- [Coroutine BoundedEventTopic](src/main/kotlin/KBoundedEventTopic.kt)
